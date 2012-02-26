@@ -22,7 +22,13 @@ this:
     public function init(Manager $moduleManager)
     {
         $events = StaticEventManager::getInstance();
-        $events->attach('BaconAssetLoader\Asset\Manager', 'collectAssetInformation', function($event){           
-            $event->getTarget()->addAssets(new AssetCollection(__DIR__ . '/public'));
-        });
+        $events->attach(
+            'BaconAssetLoader\Asset\Manager',
+            'collectAssetInformation',
+            function($event){           
+                $event->getTarget()->addAssets(
+                    new AssetCollection(__DIR__ . '/public')
+                );
+            }
+        );
     }
