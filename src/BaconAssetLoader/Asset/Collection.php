@@ -46,7 +46,7 @@ class Collection
      * @return Collection
      */
     public function addFilter($pattern, Filter $filter, $priority = 1,
-                              $onTheFly = true, $onCompile = true)
+        $onTheFly = true, $onCompile = true)
     {
         $this->filters->insert(array(
             'pattern'    => $pattern,
