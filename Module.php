@@ -1,96 +1,73 @@
 <?php
-namespace AssetLoader;
+namespace BaconAssetLoader;
 
-use Zend\Module\Manager,
-    Zend\EventManager\StaticEventManager;
+use Zend\Module\Manager as ModuleManager,
+    Zend\EventManager\Event,
+    Zend\Module\Consumer\AutoloaderProvider,
+    BaconAssetLoader\Asset\Manager as AssetManager;
 
 /**
- * Module for loading assets in development.
+ * Module for loading assets in development and compiling for production.
  */
-class Module
+class Module implements AutoloaderProvider
 {
     /**
-     * Collected asset paths.
-     *
-     * @var array
+     * Asset manager.
+     * 
+     * @var Manager
      */
-    protected $assetPaths = array();
+    protected $assetManager;
 
     /**
      * Initialize the module.
      *
-     * @param  Manager $moduleManager
+     * @param  ModuleManager $moduleManager
      * @return void
      */
-    public function init(Manager $moduleManager)
+    public function init(ModuleManager $moduleManager)
     {
-        $moduleManager->events()->attach('loadModule', array($this, 'addAssetPath'));
-
-        $events = StaticEventManager::getInstance();
-        $events->attach('Zend\Mvc\Application', 'route', array($this, 'checkRequestUriForAsset'), PHP_INT_MAX);
+        $moduleManager->events()->attach('loadModules.post', array($this, 'modulesLoaded'));
     }
 
     /**
-     * Add an asset path from a module.
-     *
-     * @param  Zend\EventManager\Event $event
+     * Called when all modules are loaded.
+     * 
      * @return void
      */
-    public function addAssetPath($event)
-    {
-        $module = $event->getModule();
-
-        if (!method_exists($module, 'getAssetPath')) {
-            return;
-        }
-
-        if (null !== ($assetPath = $module->getAssetPath())) {
-            $this->assetPaths[] = rtrim($assetPath, '\\/');
-        }
+    public function modulesLoaded(Event $event) {
+        $this->assetManager()->collectAssetInformation();
     }
-
+    
     /**
-     * Check a request for a valid file asset.
-     *
-     * @param  Zend\EventManager\Event $event
-     * @return void
+     * Get the asset manager.
+     * 
+     * @return AssetManager
      */
-    public function checkRequestUriForAsset($event)
+    public function assetManager()
     {
-        $request = $event->getRequest();
-
-        if (!method_exists($request, 'uri')) {
-            return;
+        if ($this->assetManager === null) {
+            $this->assetManager = new AssetManager();
         }
-
-        if (method_exists($request, 'getBaseUrl')) {
-            $baseUrlLength = strlen($request->getBaseUrl() ?: '');
-        } else {
-            $baseUrlLength = 0;
-        }
-
-        $path = substr($request->uri()->getPath(), $baseUrlLength);
-
-        foreach ($this->assetPaths as $assetPath) {
-            if (file_exists($assetPath . $path)) {
-                $this->sendFile($assetPath . $path);
-            }
-        }
+        
+        return $this->assetManager;
     }
-
+    
     /**
-     * Send an asset file.
-     *
-     * @param  string $file
-     * @return void
+     * Get autoloader config.
+     * 
+     * @return array
      */
-    protected function sendFile($filename)
+    public function getAutoloaderConfig()
     {
-        $finfo    = new finfo(FILEINFO_MIME);
-        $mimeType = $finfo->file($filename);
-
-        header('Content-Type: ' . $mimeType);
-        readfile($filename);
-        exit;
+        return array(
+            'Zend\Loader\ClassMapAutoloader' => array(
+                __DIR__ . '/autoload_classmap.php',
+            ),
+            'Zend\Loader\StandardAutoloader' => array(
+                'namespaces' => array(
+                    __NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
+                ),
+            ),
+        );
     }
 }
