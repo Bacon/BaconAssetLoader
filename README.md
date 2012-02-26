@@ -3,20 +3,26 @@ AssetLoader module for ZF2
 
 Introduction
 ------------
-AssetLoader is a module for ZF2 to ease the loading of assets within development
-from multiple modules. This is not meant for production, as it adds quite a bit
-of overhead. When deploying this module (will) supply a script to compile all
-assets into the public directory of the application.
+BaconAssetLoader is a module for ZF2 to ease the loading of assets within
+development from multiple modules. This is not meant for production, as it adds
+quite a bit of overhead. For deployment this module supplies a CLI script to
+compile all assets into the public directory of an application.
 
 Usage
 -----
-To use the module, it is important to add it to your application config as the
-very first module, as it relies on the loadModule event. After that you must add
-a method called "getAssetPath()" to all your modules "Module.php" files which
-contain public assets, and return an absolute path to the assets there. For
-instance, when your assets are located in a directory called "public":
+To use the module, add it to your application config. After that you must add
+a listener in the "Module.php" of those modules which contain public assets. A
+very basic example, assuming your asset directory is called "public", looks like
+this:
 
-    public function getAssetPath()
+    use BaconAssetLoader\Asset\Collection as AssetCollection;
+
+    …
+
+    public function init(Manager $moduleManager)
     {
-        return __DIR__ . '/public';
+        $events = StaticEventManager::getInstance();
+        $events->attach('BaconAssetLoader\Asset\Manager', 'collectAssetInformation', function($event){           
+            $event->getTarget()->addAssets(new AssetCollection(__DIR__ . '/public'));
+        });
     }
