@@ -34,7 +34,7 @@ class Module implements AutoloaderProvider
      * 
      * @return void
      */
-    public function modulesLoaded(Event $event) {
+    public function modulesLoaded() {
         $this->assetManager()->collectAssetInformation();
     }
     
