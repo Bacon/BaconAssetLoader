@@ -541,7 +541,7 @@ class MimeDetector
      */
     public static function getMimeType($filename)
     {
-        $extension = array_pop(explode('.', $filename));
+        $extension = pathinfo($filename, PATHINFO_EXTENSION);
         
         if (isset(self::$mimeTypes[$extension])) {
             return self::$mimeTypes[$extension];
