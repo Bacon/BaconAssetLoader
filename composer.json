@@ -1,0 +1,16 @@
+{
+    "name": "basz/zf2-module-bacon-assetloader",
+    "description": "BaconAssetLoader is a module for ZF2 to ease the loading of assets within development from multiple modules.",
+    "require": {
+        "php": ">=5.3.3"
+    },
+   "autoload": {
+        "psr-0": {
+            "BaconAssetLoader": "src/"
+        },
+        "classmap": [
+            "./"
+        ]
+    }
+}
+
