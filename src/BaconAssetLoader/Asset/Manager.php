@@ -92,6 +92,11 @@ class Manager implements EventManagerAwareInterface
         }
 
         $path = substr($request->uri()->getPath(), $baseUrlLength);
+
+        if (substr($path, -1) == '/') {
+            return;
+        }
+
         $file = null;
         
         foreach ($this->assets as $collection) {
