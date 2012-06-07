@@ -19,16 +19,14 @@ this:
 
     …
 
-    public function init(Manager $moduleManager)
+    public function onBootstrap(\Zend\Mvc\MvcEvent $mvcEvent)
     {
-        $events = StaticEventManager::getInstance();
-        $events->attach(
-            'BaconAssetLoader\Asset\Manager',
-            'collectAssetInformation',
-            function($event){           
-                $event->getTarget()->addAssets(
-                    new AssetCollection(__DIR__ . '/public')
-                );
-            }
-        );
+        /**
+         * @var \Zend\EventManager\SharedEventManager
+         */
+        $sharedEvents = $mvcEvent->getApplication()->events()->getSharedManager();
+        $sharedEvents->attach('BaconAssetLoader\Asset\Manager', 'collectAssetInformation', function(\Zend\EventManager\Event $event) {
+            $event->getTarget()->addAssets(new AssetCollection(__DIR__ . '/public'));
+        });
     }
+
