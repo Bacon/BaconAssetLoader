@@ -1,60 +1,33 @@
 <?php
+
 namespace BaconAssetLoader;
 
-use Zend\Module\Manager as ModuleManager,
-    Zend\EventManager\Event,
-    Zend\Module\Consumer\AutoloaderProvider,
-    BaconAssetLoader\Asset\Manager as AssetManager;
+use BaconAssetLoader\Asset\Manager as AssetManager,
+    Zend\Mvc\MvcEvent;
 
 /**
  * Module for loading assets in development and compiling for production.
  */
-class Module implements AutoloaderProvider
+class Module
 {
-    /**
-     * Asset manager.
-     * 
-     * @var Manager
-     */
-    protected $assetManager;
-
-    /**
-     * Initialize the module.
-     *
-     * @param  ModuleManager $moduleManager
-     * @return void
-     */
-    public function init(ModuleManager $moduleManager)
-    {
-        $moduleManager->events()->attach('loadModules.post', array($this, 'modulesLoaded'));
-    }
 
     /**
      * Called when all modules are loaded.
-     * 
+     *
      * @return void
      */
-    public function modulesLoaded() {
-        $this->assetManager()->collectAssetInformation();
-    }
-    
-    /**
-     * Get the asset manager.
-     * 
-     * @return AssetManager
-     */
-    public function assetManager()
+    public function onBootstrap(MvcEvent $e)
     {
-        if ($this->assetManager === null) {
-            $this->assetManager = new AssetManager();
-        }
-        
-        return $this->assetManager;
+        /**
+         * @var AssetManager;
+         */
+    	$service = $e->getApplication()->getServiceManager()->get('BaconAssetLoader.AssetManager');
+        $service->collectAssetInformation();
     }
-    
+
     /**
      * Get autoloader config.
-     * 
+     *
      * @return array
      */
     public function getAutoloaderConfig()
@@ -70,4 +43,20 @@ class Module implements AutoloaderProvider
             ),
         );
     }
+
+    public function getServiceConfiguration()
+    {
+        return array(
+            'aliases' => array(
+            ),
+            'factories' => array(
+                'BaconAssetLoader.AssetManager' => function ($sm) {
+                    $service = new AssetManager($sm->get('EventManager'));
+
+                    return $service;
+                },
+            ),
+        );
+    }
+
 }
