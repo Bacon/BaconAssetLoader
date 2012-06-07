@@ -1,23 +1,20 @@
 <?php
+
 namespace BaconAssetLoader\Asset;
 
 use Zend\Module\Manager as ModuleManager,
     Zend\EventManager\EventManager,
+    Zend\EventManager\EventManagerInterface,
     Zend\EventManager\StaticEventManager,
+    Zend\EventManager\EventManagerAwareInterface,
     Zend\EventManager\Event,
     Zend\Mvc\MvcEvent;
 
 /**
  * Asset manager.
  */
-class Manager
+class Manager implements EventManagerAwareInterface
 {
-    /**
-     * Events other modules can subscribe to.
-     *
-     * @var EventManager
-     */
-    protected $events;
 
     /**
      * Registered asset collections.
@@ -27,16 +24,29 @@ class Manager
     protected $assets = array();
 
     /**
-     * Create a new asset manager.
-     * 
+     * Events other modules can subscribe to.
+     *
+     * @var EventManager
+     */
+    protected $events;
+
+    /**
+     * @var ServiceManager
+     */
+    protected $serviceManager = null;
+
+    /**
+     * Constructor
+     *
+     * @param  EventManagerInterface $eventManager
      * @return void
      */
-    public function __construct()
+    public function __construct(EventManager $eventManager)
     {
-        $events = StaticEventManager::getInstance();
-        $events->attach('Zend\Mvc\Application', 'route', array($this, 'testRequestForAsset'), PHP_INT_MAX);                
+        $this->setEventManager($eventManager);
+        $this->events()->getSharedManager()->attach('application', 'route', array($this, 'testRequestForAsset'), PHP_INT_MAX);
     }
-    
+
     /**
      * Trigger event to collect asset information.
      *
@@ -46,10 +56,10 @@ class Manager
     {
         $this->events()->trigger(__FUNCTION__, $this);
     }
-    
+
     /**
      * Add assets to the manager.
-     * 
+     *
      * @param  AssetCollection $assets
      * @return void
      */
@@ -57,15 +67,15 @@ class Manager
     {
         $this->assets[] = $assets;
     }
-    
+
     /**
      * Test the request for an existing asset.
-     * 
+     *
      * If an asset matches the request, it is passed to the client and
      * the application quits.
-     * 
+     *
      * @param  MvcEvent $event
-     * @return void 
+     * @return void
      */
     public function testRequestForAsset(MvcEvent $event)
     {
@@ -76,7 +86,7 @@ class Manager
         }
 
         if (method_exists($request, 'getBaseUrl')) {
-            $baseUrlLength = strlen($request->getBaseUrl() ?: '');
+            $baseUrlLength = strlen($request->getBaseUrl() ? : '');
         } else {
             $baseUrlLength = 0;
         }
@@ -92,22 +102,37 @@ class Manager
 
         if ($file !== null) {
             $mimeType = MimeDetector::getMimeType($file->getPath());
-            
+
             header('Content-Type: ' . $mimeType);
             $file->streamToClient();
             exit;
         }
     }
-    
+
     /**
      * Compile all collected assets into a path.
-     *  
+     *
      * @param  string $path
      * @return void
      */
     public function compile($path)
     {
         // @todo
+    }
+
+    /**
+     * Set the event manager instance used by this module manager.
+     *
+     * @param  EventManagerInterface $events
+     * @return ModuleManager
+     */
+    public function setEventManager(EventManagerInterface $events)
+    {
+        $events->setIdentifiers(array(
+            __CLASS__,
+        ));
+        $this->events = $events;
+        return $this;
     }
 
     /**
@@ -123,4 +148,5 @@ class Manager
 
         return $this->events;
     }
+
 }
