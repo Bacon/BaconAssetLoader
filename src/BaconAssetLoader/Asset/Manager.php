@@ -44,7 +44,7 @@ class Manager implements EventManagerAwareInterface
     public function __construct(EventManager $eventManager)
     {
         $this->setEventManager($eventManager);
-        $this->events()->getSharedManager()->attach('application', 'route', array($this, 'testRequestForAsset'), PHP_INT_MAX);
+        $this->getEventManager()->getSharedManager()->attach('application', 'route', array($this, 'testRequestForAsset'), PHP_INT_MAX);
     }
 
     /**
@@ -54,7 +54,7 @@ class Manager implements EventManagerAwareInterface
      */
     public function collectAssetInformation()
     {
-        $this->events()->trigger(__FUNCTION__, $this);
+        $this->getEventManager()->trigger(__FUNCTION__, $this);
     }
 
     /**
@@ -81,7 +81,7 @@ class Manager implements EventManagerAwareInterface
     {
         $request = $event->getRequest();
 
-        if (!method_exists($request, 'uri')) {
+        if (!method_exists($request, 'getUri')) {
             return;
         }
 
@@ -91,7 +91,7 @@ class Manager implements EventManagerAwareInterface
             $baseUrlLength = 0;
         }
 
-        $path = substr($request->uri()->getPath(), $baseUrlLength);
+        $path = substr($request->getUri()->getPath(), $baseUrlLength);
 
         if (substr($path, -1) == '/') {
             return;
@@ -145,7 +145,7 @@ class Manager implements EventManagerAwareInterface
      *
      * @return EventCollection
      */
-    public function events()
+    public function getEventManager()
     {
         if ($this->events === null) {
             $this->events = new EventManager(__CLASS__);
