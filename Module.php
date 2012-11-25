@@ -1,16 +1,26 @@
 <?php
+/**
+ * BaconAssetLoader
+ *
+ * @link      http://github.com/Bacon/BaconAssetLoader For the canonical source repository
+ * @copyright 2011-2012 Ben Scholzen 'DASPRiD'
+ * @license   http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
+ */
 
 namespace BaconAssetLoader;
 
-use BaconAssetLoader\Asset\Manager as AssetManager,
-    Zend\Mvc\MvcEvent;
+use BaconAssetLoader\Asset\Manager as AssetManager;
+use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
+use Zend\ModuleManager\Feature\ServiceProviderInterface;
+use Zend\Mvc\MvcEvent;
 
 /**
  * Module for loading assets in development and compiling for production.
  */
-class Module
+class Module implements
+    AutoloaderProviderInterface,
+    ServiceProviderInterface
 {
-
     /**
      * Called when all modules are loaded.
      *
@@ -18,16 +28,14 @@ class Module
      */
     public function onBootstrap(MvcEvent $e)
     {
-        /**
-         * @var AssetManager;
-         */
     	$service = $e->getApplication()->getServiceManager()->get('BaconAssetLoader.AssetManager');
         $service->collectAssetInformation();
     }
 
     /**
-     * Get autoloader config.
+     * getAutoloaderConfig(): defined by AutoloaderProviderInterface.
      *
+     * @see    AutoloaderProviderInterface::getAutoloaderConfig()
      * @return array
      */
     public function getAutoloaderConfig()
@@ -44,19 +52,21 @@ class Module
         );
     }
 
+    /**
+     * getServiceConfig(): defined by ServiceProviderInterface.
+     *
+     * @see    ServiceProviderInterface::getServiceConfig()
+     * @return array
+     */
     public function getServiceConfig()
     {
         return array(
-            'aliases' => array(
-            ),
             'factories' => array(
                 'BaconAssetLoader.AssetManager' => function ($sm) {
                     $service = new AssetManager($sm->get('EventManager'));
-
                     return $service;
                 },
             ),
         );
     }
-
 }

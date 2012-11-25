@@ -1,19 +1,22 @@
 {
 	"name": "bacon/BaconAssetLoader",
 	"description": "BaconAssetLoader is a module for ZF2 to ease the loading of assets within development from multiple modules.",
-	"license" : "whatever",
+	"license" : "BSD-2-Clause",
 	"homepage": "https://github.com/Bacon/BaconAssetLoader",
 	"require": {
 		"php": ">=5.3.3"
 	},
-	"authors": [{
-		"name": "Ben Scholzen",
-		"email": "mail@dasprids.de"
-	}],
+	"authors": [
+        {
+            "name": "Ben Scholzen 'DASPRiD'",
+            "email": "mail@dasprids.de",
+            "homepage": "http://www.dasprids.de",
+            "role": "Developer"
+        }
+    ],
 	"autoload": {
 		"psr-0": {
 			"BaconAssetLoader": "src/"
-		},
-        "classmap": ["Module.php"]
+		}
 	}
 }

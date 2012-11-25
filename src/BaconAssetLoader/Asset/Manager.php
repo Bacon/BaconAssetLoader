@@ -1,14 +1,18 @@
 <?php
+/**
+ * BaconAssetLoader
+ *
+ * @link      http://github.com/Bacon/BaconAssetLoader For the canonical source repository
+ * @copyright 2011-2012 Ben Scholzen 'DASPRiD'
+ * @license   http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
+ */
 
 namespace BaconAssetLoader\Asset;
 
-use Zend\Module\Manager as ModuleManager,
-    Zend\EventManager\EventManager,
-    Zend\EventManager\EventManagerInterface,
-    Zend\EventManager\StaticEventManager,
-    Zend\EventManager\EventManagerAwareInterface,
-    Zend\EventManager\Event,
-    Zend\Mvc\MvcEvent;
+use Zend\EventManager\EventManager;
+use Zend\EventManager\EventManagerAwareInterface;
+use Zend\EventManager\EventManagerInterface;
+use Zend\Mvc\MvcEvent;
 
 /**
  * Asset manager.
@@ -29,11 +33,6 @@ class Manager implements EventManagerAwareInterface
      * @var EventManager
      */
     protected $events;
-
-    /**
-     * @var ServiceManager
-     */
-    protected $serviceManager = null;
 
     /**
      * Constructor
@@ -98,7 +97,7 @@ class Manager implements EventManagerAwareInterface
         }
 
         $file = null;
-        
+
         foreach ($this->assets as $collection) {
             if (null !== ($file = $collection->getAsset($path))) {
                 break;
@@ -129,7 +128,7 @@ class Manager implements EventManagerAwareInterface
      * Set the event manager instance used by this module manager.
      *
      * @param  EventManagerInterface $events
-     * @return ModuleManager
+     * @return Manager
      */
     public function setEventManager(EventManagerInterface $events)
     {

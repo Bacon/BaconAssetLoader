@@ -1,4 +1,12 @@
 <?php
+/**
+ * BaconAssetLoader
+ *
+ * @link      http://github.com/Bacon/BaconAssetLoader For the canonical source repository
+ * @copyright 2011-2012 Ben Scholzen 'DASPRiD'
+ * @license   http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
+ */
+
 namespace BaconAssetLoader\Asset;
 
 /**
@@ -8,7 +16,7 @@ class MimeDetector
 {
     /**
      * Map between file extensions and mime types.
-     * 
+     *
      * @var array
      */
     protected static $mimeTypes = array(
@@ -532,21 +540,21 @@ class MimeDetector
         '~'        => 'application/x-trash',
         '323'      => 'text/h323',
     );
-            
+
     /**
      * Get the mime type from a file extension.
-     * 
+     *
      * @param  string $filename
      * @return string
      */
     public static function getMimeType($filename)
     {
         $extension = pathinfo($filename, PATHINFO_EXTENSION);
-        
+
         if (isset(self::$mimeTypes[$extension])) {
             return self::$mimeTypes[$extension];
         }
-        
+
         return 'text/plain';
     }
 }
