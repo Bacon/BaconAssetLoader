@@ -43,7 +43,12 @@ class Manager implements EventManagerAwareInterface
     public function __construct(EventManager $eventManager)
     {
         $this->setEventManager($eventManager);
-        $this->getEventManager()->getSharedManager()->attach('application', 'route', array($this, 'testRequestForAsset'), PHP_INT_MAX);
+        $this->getEventManager()->getSharedManager()->attach(
+            'application',
+            'route',
+            array($this, 'testRequestForAsset'),
+            PHP_INT_MAX
+        );
     }
 
     /**
@@ -114,14 +119,16 @@ class Manager implements EventManagerAwareInterface
     }
 
     /**
-     * Compile all collected assets into a path.
+     * Publish all collected assets to a given path.
      *
      * @param  string $path
      * @return void
      */
-    public function compile($path)
+    public function publish($path)
     {
-        // @todo
+        foreach ($this->assets as $collection) {
+            $collection->publish($path);
+        }
     }
 
     /**

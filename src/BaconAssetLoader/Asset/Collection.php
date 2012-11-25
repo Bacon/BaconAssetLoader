@@ -9,6 +9,8 @@
 
 namespace BaconAssetLoader\Asset;
 
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use Zend\Filter\Filter;
 use Zend\Stdlib\SplPriorityQueue;
 
@@ -79,7 +81,7 @@ class Collection
     public function getAsset($path)
     {
         if (is_file($this->path . $path)) {
-            $file = new File($this->path . $path);
+            $file = new File($this->path, $path);
 
             foreach ($this->filters as $filter) {
                 if (fnmatch($path, $filter['pattern'])) {
@@ -91,5 +93,35 @@ class Collection
         }
 
         return null;
+    }
+
+    /**
+     * Publish the collection.
+     *
+     * @param  string $path
+     * @return void
+     */
+    public function publish($path)
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($this->path)
+        );
+
+        foreach ($iterator as $fileinfo) {
+            if ($fileinfo->isDot()) {
+                continue;
+            }
+
+            $relativePath = substr($fileinfo->getPathname(), strlen($this->path));
+            $file         = new File($fileinfo->getPathname());
+
+            foreach ($this->filters as $filter) {
+                if (fnmatch($relativePath, $filter['pattern'])) {
+                    $file->addFilter($filter);
+                }
+            }
+
+            $file->publish($path);
+        }
     }
 }

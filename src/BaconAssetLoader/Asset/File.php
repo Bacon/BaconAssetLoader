@@ -15,6 +15,13 @@ namespace BaconAssetLoader\Asset;
 class File
 {
     /**
+     * Prefix of the path.
+     *
+     * @var string
+     */
+    protected $prefix;
+
+    /**
      * Path to the file.
      *
      * @var string
@@ -34,9 +41,10 @@ class File
      * @param  string $path
      * @return void
      */
-    public function __construct($path)
+    public function __construct($prefix, $path)
     {
-        $this->path = $path;
+        $this->prefix = $prefix;
+        $this->path   = $path;
     }
 
     /**
@@ -77,8 +85,10 @@ class File
             }
         }
 
+        $filePath = $this->prefix . '/' . $this->path;
+
         if ($filters) {
-            $contents = file_get_contents($this->path);
+            $contents = file_get_contents($filePath);
 
             foreach ($filters as $filter) {
                 $contents = $filter->filter($contents);
@@ -86,7 +96,41 @@ class File
 
             echo $contents;
         } else {
-            readfile($this->path);
+            readfile($filePath);
+        }
+    }
+
+    /**
+     * Publish the file.
+     *
+     * @param  string $path
+     * @return void
+     */
+    public function publish($path)
+    {
+        $filters = array();
+
+        if ($this->filters) {
+            foreach ($this->filters as $filter) {
+                if ($filter['publish']) {
+                    $filters[] = $filter['filter'];
+                }
+            }
+        }
+
+        @mkdir(dirname($path . '/' . $this->path), 0755, true);
+        $filePath = $this->prefix . '/' . $this->path;
+
+        if ($filters) {
+            $contents = file_get_contents($filePath);
+
+            foreach ($filters as $filter) {
+                $contents = $filter->filter($contents);
+            }
+
+            file_put_contents($path . '/' . $this->path, $contents);
+        } else {
+            copy($filePath, $path . '/' . $this->path);
         }
     }
 }

@@ -11,6 +11,7 @@ namespace BaconAssetLoader;
 
 use BaconAssetLoader\Asset\Manager as AssetManager;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
+use Zend\ModuleManager\Feature\ConfigProviderInterface;
 use Zend\ModuleManager\Feature\ServiceProviderInterface;
 use Zend\Mvc\MvcEvent;
 
@@ -19,6 +20,7 @@ use Zend\Mvc\MvcEvent;
  */
 class Module implements
     AutoloaderProviderInterface,
+    ConfigProviderInterface,
     ServiceProviderInterface
 {
     /**
@@ -30,6 +32,17 @@ class Module implements
     {
     	$service = $e->getApplication()->getServiceManager()->get('BaconAssetLoader.AssetManager');
         $service->collectAssetInformation();
+    }
+
+    /**
+     * getConfig(): defined by ConfigProviderInterface.
+     *
+     * @see    ConfigProviderInterface::getConfig()
+     * @return array
+     */
+    public function getConfig()
+    {
+        return include __DIR__ . '/config/module.config.php';
     }
 
     /**

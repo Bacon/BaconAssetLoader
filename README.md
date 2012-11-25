@@ -16,17 +16,26 @@ very basic example, assuming your asset directory is called "public", looks like
 this:
 
     use BaconAssetLoader\Asset\Collection as AssetCollection;
+    use Zend\Mvc\MvcEvent;
+    use Zend\EventManager\Event;
 
     …
 
-    public function onBootstrap(\Zend\Mvc\MvcEvent $mvcEvent)
+    public function onBootstrap(MvcEvent $mvcEvent)
     {
-        /**
-         * @var \Zend\EventManager\SharedEventManager
-         */
-        $sharedEvents = $mvcEvent->getApplication()->events()->getSharedManager();
-        $sharedEvents->attach('BaconAssetLoader\Asset\Manager', 'collectAssetInformation', function(\Zend\EventManager\Event $event) {
-            $event->getTarget()->addAssets(new AssetCollection(__DIR__ . '/public'));
-        });
+        $sm = $mvcEvent->getApplication()->getServiceManager();
+        $sm->get('BaconAssetLoader.AssetManager')->getEventManager()->attach(
+            'collectAssetInformation',
+            function(Event $event) {
+                $event->getTarget()->addAssets(new AssetCollection(__DIR__ . '/public'));
+            }
+        );
     }
 
+Publishing assets in your build
+-------------------------------
+When building your project, you likely want to publish all your assets into a
+single directory later accessible by your web-server. To do this, simply make
+the following call on your console:
+
+    php public/index.php baconassetloader publish-assets public
